@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:text="DEMO"
+              android:textSize="12pt"
+              android:paddingBottom="1pt"
+              android:paddingLeft="10pt"
+              android:paddingTop="2pt"
+            />
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:text="OVERRIDE: Injecting Synthetic Sensor Data for Improved Context-Aware Apps and Controlled Context Release."
+              android:textSize="6pt"
+              android:paddingRight="10pt"
+              android:paddingLeft="10pt"
+              android:paddingTop="1pt"
+              android:paddingBottom="10pt"
+            />
+
+
+    <Button android:id="@+id/btnStart"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12pt"
+            android:paddingBottom="10pt"
+            android:paddingTop="2pt"
+            android:text="Click to receive synthetic sensor data via native API"/>
+
+    <TextView android:id="@+id/txtLocation"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:paddingBottom="10pt"
+              android:paddingTop="10pt"
+              android:text="---LOCATION UPDATES RECEIVED HERE---"/>
+
+    <TextView android:id="@+id/txtAccel"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:paddingBottom="10pt"
+              android:paddingTop="10pt"
+              android:text="---ACCEL UPDATES RECEIVED HERE---"/>
+
+</LinearLayout>
+

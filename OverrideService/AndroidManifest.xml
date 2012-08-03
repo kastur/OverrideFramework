@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android.override">
+    <uses-sdk android:minSdkVersion="15"/>
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
+        <service android:name=".OverrideSensorService" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.override.OverrideSensorService"/>
+            </intent-filter>
+        </service>
+        <service android:name=".OverrideLocationService" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.override.OverrideLocationService"/>
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

@@ -13,6 +13,7 @@ import android.os.*;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 // The OverrideLocationManager is a bare-bones version of the default Android LocationManager.
 // If implemented as part of the Android Framework, we will make this class extend LocationManager directly,
@@ -23,14 +24,27 @@ public class OverrideLocationManager {
     private static final String TAG = "OverrideLocationManager";
     private Context mContext;
     private IOverrideLocationService mService;
-    private LocationManager mLocationManager;
+    //private LocationManager mLocationManager;
 
     public OverrideLocationManager(Context context) {
+        Log.i(TAG, context.getPackageName() + " constructed a new OverrideLocationManager");
         mContext = context;
-        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        //mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         Intent serviceIntent = new Intent("android.override.OverrideLocationService");
         mContext.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+    }
+
+    public boolean isProviderEnabled(String provider) {
+        if (provider == LocationManager.GPS_PROVIDER)
+            return true;
+        else
+            return false;
+    }
+
+    public String getBestProvider(Criteria criteria, boolean i_dont_know_what) {
+        return LocationManager.GPS_PROVIDER;
     }
 
     public void requestLocationUpdates(String provider, long minTime, float minDistance, LocationListener listener) {
@@ -42,15 +56,18 @@ public class OverrideLocationManager {
     }
 
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria, LocationListener listener, Looper looper) {
-        mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, listener, looper);
+        Log.i(TAG, "Blocked requestLocationUpdates(long minTime, float minDistance, Criteria criteria, LocationListener listener, Looper looper)");
+        //mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, listener, looper);
     }
 
     public void requestLocationUpdates(String provider, long minTime, float minDistance, PendingIntent intent) {
-        mLocationManager.requestLocationUpdates(provider, minTime, minDistance, intent);
+        Log.i(TAG, "Blocked requestLocationUpdates(String provider, long minTime, float minDistance, PendingIntent intent)");
+        //mLocationManager.requestLocationUpdates(provider, minTime, minDistance, intent);
     }
 
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria, PendingIntent intent) {
-        mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, intent);
+        Log.i(TAG, "Blocked requestLocationUpdates(long minTime, float minDistance, Criteria criteria, PendingIntent intent)");
+        //mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, intent);
     }
 
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
@@ -58,15 +75,18 @@ public class OverrideLocationManager {
     }
 
     public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
-        mLocationManager.requestSingleUpdate(criteria, listener, looper);
+        Log.i(TAG, "Blocked requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper)");
+        //mLocationManager.requestSingleUpdate(criteria, listener, looper);
     }
 
     public void requestSingleUpdate(String provider, PendingIntent intent) {
-        mLocationManager.requestSingleUpdate(provider, intent);
+        Log.i(TAG, "Blocked requestSingleUpdate(String provider, PendingIntent intent)");
+        //mLocationManager.requestSingleUpdate(provider, intent);
     }
 
     public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
-        mLocationManager.requestSingleUpdate(criteria, intent);
+        Log.i(TAG, "Blocked requestSingleUpdate(Criteria criteria, PendingIntent intent)");
+        //mLocationManager.requestSingleUpdate(criteria, intent);
     }
 
     public void removeUpdates(LocationListener listener) {
@@ -74,23 +94,27 @@ public class OverrideLocationManager {
     }
 
     public void removeUpdates(PendingIntent intent) {
-        mLocationManager.removeUpdates(intent);
+        Log.i(TAG, "Blocked removeUpdates(PendingIntent intent)");
+        //mLocationManager.removeUpdates(intent);
     }
 
     public void addProximityAlert(double latitude, double longitude, float radius, long expiration, PendingIntent intent) {
-        mLocationManager.addProximityAlert(latitude, longitude, radius, expiration, intent);
+        Log.i(TAG, "Blocked addProximityAlert(double latitude, double longitude, float radius, long expiration, PendingIntent intent)");
+        //mLocationManager.addProximityAlert(latitude, longitude, radius, expiration, intent);
     }
 
     public void removeProximityAlert(PendingIntent intent) {
-        mLocationManager.removeProximityAlert(intent);
-    }
-
-    public boolean isProviderEnabled(String provider) {
-        return mLocationManager.isProviderEnabled(provider);
+        Log.i(TAG, "Blocked removeProximityAlert(PendingIntent intent)");
+        //mLocationManager.removeProximityAlert(intent);
     }
 
     public Location getLastKnownLocation(String provider) {
-        return mLocationManager.getLastKnownLocation(provider);
+        Log.i(TAG, "Blocked getLastKnownLocation(String provider). Returned location of empire state!");
+        //return mLocationManager.getLastKnownLocation(provider);
+        Location empire_state = new Location(provider);
+        empire_state.setLatitude(40.748502);
+        empire_state.setLongitude(-73.98445);
+        return empire_state;
     }
 
     // ------------------------------------------------------------------------
@@ -98,7 +122,45 @@ public class OverrideLocationManager {
     private final HashMap<LocationListener, ListenerTransport> mListeners =
             new HashMap<LocationListener, ListenerTransport>();
 
+    private LinkedList<Runnable> mTaskeQueue = new LinkedList<Runnable>();
+
     private void _requestLocationUpdates(String provider, boolean singleShot, LocationListener listener, Looper looper) {
+        if (mService == null) {
+            Log.i(TAG, "Deferring _requestLocationUpdates: " + provider + "," + singleShot);
+            final String final_provider = provider;
+            final boolean final_singleShot = singleShot;
+            final LocationListener final_listener = listener;
+            final Looper final_looper = looper;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    _handleRequestLocationUpdates(final_provider, final_singleShot, final_listener, final_looper);
+                }
+            };
+            mTaskeQueue.add(task);
+        } else {
+            _handleRequestLocationUpdates(provider, singleShot, listener, looper);
+        }
+    }
+
+    private void _removeUpdates(LocationListener listener) {
+        if (mService == null) {
+            Log.i(TAG, "Deferring _removeUpdates " + listener);
+            final LocationListener final_listener = listener;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    _handleRemoveUpdates(final_listener);
+                }
+            };
+            mTaskeQueue.add(task);
+        } else {
+            _handleRemoveUpdates(listener);
+        }
+    }
+
+    private void _handleRequestLocationUpdates(String provider, boolean singleShot, LocationListener listener, Looper looper) {
+        Log.i(TAG, "_requestLocationUpdates: " + provider + "," + singleShot);
         try {
             synchronized (mListeners) {
                 ListenerTransport transport = mListeners.get(listener);
@@ -108,23 +170,30 @@ public class OverrideLocationManager {
                 mListeners.put(listener, transport);
 
                 if (mService == null) {
-                    Log.i(TAG, "Location service is not available.");
+                    Log.i(TAG, "_requestLocationUpdates: Location service is not available.");
                 } else {
                     mService.requestLocationUpdates(mContext.getPackageName(), provider, singleShot, transport);
                 }
             }
+
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: DeadObjectException", ex);
         }
     }
 
-    private void _removeUpdates(LocationListener listener) {
+    private void _handleRemoveUpdates(LocationListener listener) {
+        Log.i(TAG, "_removeUpdates: ");
         ListenerTransport transport = mListeners.get(listener);
         try {
-            if (transport != null)
-                mService.removeUpdates(transport);
+            if (transport != null) {
+                if (mService == null) {
+                    Log.i(TAG, "_requestLocationUpdates: Location service is not available.");
+                } else {
+                    mService.removeUpdates(transport);
+                }
+            }
         } catch (RemoteException ex) {
-            Log.e(TAG, "transport: DeadObjectException", ex);
+            Log.e(TAG, "_removeUpdates transport: DeadObjectException", ex);
         }
     }
 
@@ -133,10 +202,15 @@ public class OverrideLocationManager {
         public void onServiceConnected(ComponentName componentName, IBinder binder) {
             Log.i(TAG, "Connected to service");
             mService = IOverrideLocationService.Stub.asInterface(binder);
+
+            for (Runnable task : mTaskeQueue) {
+                task.run();
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            mService = null;
         }
     };
 

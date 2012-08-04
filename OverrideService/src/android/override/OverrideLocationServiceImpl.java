@@ -407,6 +407,8 @@ public class OverrideLocationServiceImpl extends IOverrideLocationService.Stub {
         ArrayList<Receiver> deadReceivers = null;
 
         // Broadcast location or status to all listeners
+        location.setProvider(LocationManager.GPS_PROVIDER);
+
         for (UpdateRecord r : records) {
             Receiver receiver = r.mReceiver;
             boolean receiverDead = false;
@@ -449,10 +451,10 @@ public class OverrideLocationServiceImpl extends IOverrideLocationService.Stub {
         public void handleMessage(Message msg) {
             try {
                 if (msg.what == MESSAGE_LOCATION_CHANGED) {
-                    Log.d(TAG, "LocationWorkerHandler: MESSAGE_LOCATION_CHANGED!");
-
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
+                        Log.d(TAG, "LocationWorkerHandler: Location report from " + location.getProvider());
+
                         handleLocationChangedLocked(location);
                     }
                 }

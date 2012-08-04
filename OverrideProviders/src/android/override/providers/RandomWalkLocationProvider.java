@@ -16,7 +16,7 @@ import java.util.TimerTask;
 
 public class RandomWalkLocationProvider extends Service {
     private static final String TAG = "RandomWalkLocationProvider";
-    public static final String RANDOM_WALK_LOCATION_PROVIDER = "android.override.demo/gps";
+    public static final String RANDOM_WALK_LOCATION_PROVIDER = "com.facebook.katana/gps";
 
     IOverrideLocationService mService;
     ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -44,6 +44,7 @@ public class RandomWalkLocationProvider extends Service {
 
         @Override
         public void run() {
+
             mLocation.setLatitude(mLocation.getLatitude() + Math.random() - 0.5);
             mLocation.setLongitude(mLocation.getLongitude() + Math.random() - 0.5);
             mLocation.setProvider(RANDOM_WALK_LOCATION_PROVIDER);
@@ -72,8 +73,8 @@ public class RandomWalkLocationProvider extends Service {
         startService(serviceIntent);
 
         mLocation = new Location(RANDOM_WALK_LOCATION_PROVIDER);
-        mLocation.setLatitude(0.0);
-        mLocation.setLongitude(0.0);
+        mLocation.setLatitude(40.748502);
+        mLocation.setLongitude(-73.98445);
 
         mTaskTimer.scheduleAtFixedRate(mPeriodicReportTask, 500, 5000);
     }

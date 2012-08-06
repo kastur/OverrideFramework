@@ -45,8 +45,9 @@ public class RandomWalkLocationProvider extends Service {
         @Override
         public void run() {
 
-            mLocation.setLatitude(mLocation.getLatitude() + 0.001 * (Math.random() - 0.5));
-            mLocation.setLongitude(mLocation.getLongitude() + 0.001 * (Math.random() - 0.5));
+            // Move about 40 feeet everytime the location is updated.
+            mLocation.setLatitude(mLocation.getLatitude() + 0.0001 * (Math.random() - 0.5));
+            mLocation.setLongitude(mLocation.getLongitude() + 0.0001 * (Math.random() - 0.5));
             mLocation.setProvider(RANDOM_WALK_LOCATION_PROVIDER);
             mLocation.setTime(new java.util.Date().getTime());
 

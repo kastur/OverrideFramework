@@ -14,74 +14,108 @@ import android.util.Log;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Periodically reports locations, each randomly perturbed from a starting point.
+ */
 public class RandomWalkLocationProvider extends Service {
-    private static final String TAG = "RandomWalkLocationProvider";
-    public static final String RANDOM_WALK_LOCATION_PROVIDER = "com.facebook.katana/gps";
 
-    IOverrideLocationService mService;
-    ServiceConnection mServiceConnection = new ServiceConnection() {
+  private static final String TAG = "RandomWalkLocationProvider";
+  public static final String RANDOM_WALK_LOCATION_PROVIDER = "RandomWalkLocationProvider";
 
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            mService = IOverrideLocationService.Stub.asInterface(binder);
+  // Start out at the Empire State Building
+  private static final double START_LATITUDE = 40.748502;
+  private static final double START_LONGITUDE = -73.98445;
 
-            try {
-                mService.addOverrideProvider(RANDOM_WALK_LOCATION_PROVIDER);
-            } catch (RemoteException e) {
-                Log.e(TAG, "addOverrideProvider: OverrideLocationService is not available.");
-            }
-        }
+  private static final int LOCATION_REPORT_DELAY = 500; // half a second.
+  private static final int LOCATION_REPORT_PERIOD = 5000; // report new location every 5 seconds.
+  private static final double RANDOM_WALK_MAX_MOVE = 0.0001; // 1/10000 of a degree, around 40 feet.
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService = null;
-        }
-    };
+  @Override
+  public IBinder onBind(Intent intent) {
+    return null;
+  }
 
-    Location mLocation;
-    Timer mTaskTimer = new Timer("PeriodicRandomWalkLocationUpdates");
-    TimerTask mPeriodicReportTask = new TimerTask() {
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    bindToOverrideLocationManager();
+    initializePeriodicLocationReports();
+  }
 
-        @Override
-        public void run() {
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    unregisterAsProvider();
+  }
 
-            // Move about 40 feeet everytime the location is updated.
-            mLocation.setLatitude(mLocation.getLatitude() + 0.0001 * (Math.random() - 0.5));
-            mLocation.setLongitude(mLocation.getLongitude() + 0.0001 * (Math.random() - 0.5));
-            mLocation.setProvider(RANDOM_WALK_LOCATION_PROVIDER);
-            mLocation.setTime(new java.util.Date().getTime());
+  private void registerAsProvider() {
+    try {
+      mService.addOverrideProvider(RANDOM_WALK_LOCATION_PROVIDER);
+    } catch (RemoteException e) {
+      Log.e(TAG, "addOverrideProvider: OverrideLocationService is not available.");
+    }
+  }
 
-            if (mService == null)
-                return;
-            try {
-                mService.reportOverrideLocation(RANDOM_WALK_LOCATION_PROVIDER, mLocation);
-            } catch (RemoteException e) {
-                Log.e(TAG, "reportOverrideLocation: OverrideLocationService is not available.");
-            }
-        }
-    };
+  private void unregisterAsProvider() {
+    try {
+      mService.removeOverrideProvider(RANDOM_WALK_LOCATION_PROVIDER);
+    } catch (RemoteException e) {
+      Log.e(TAG, "removeOverrideProvider: OverrideLocationService is not available.");
+    }
+  }
+
+  IOverrideLocationService mService;
+  ServiceConnection mServiceConnection = new ServiceConnection() {
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public void onServiceConnected(ComponentName componentName, IBinder binder) {
+      mService = IOverrideLocationService.Stub.asInterface(binder);
+      registerAsProvider();
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Intent serviceIntent = new Intent("android.override.OverrideLocationService");
-        bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        startService(serviceIntent);
-
-        mLocation = new Location(RANDOM_WALK_LOCATION_PROVIDER);
-        mLocation.setLatitude(40.748502);
-        mLocation.setLongitude(-73.98445);
-
-        mTaskTimer.scheduleAtFixedRate(mPeriodicReportTask, 500, 5000);
+    public void onServiceDisconnected(ComponentName componentName) {
+      mService = null;
     }
+  };
 
+  private void bindToOverrideLocationManager() {
+    Intent serviceIntent = new Intent("android.override.OverrideLocationService");
+    bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    startService(serviceIntent);
+  }
+
+  Location mLocation;
+  Timer mTaskTimer = new Timer("PeriodicRandomWalkLocationUpdates");
+
+  TimerTask mPeriodicReportTask = new TimerTask() {
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void run() {
+
+      // Report a new location around upto 40 feet away from the previous one.
+      mLocation.setLatitude(mLocation.getLatitude() + RANDOM_WALK_MAX_MOVE * (Math.random() - 0.5));
+      mLocation
+          .setLongitude(mLocation.getLongitude() + RANDOM_WALK_MAX_MOVE * (Math.random() - 0.5));
+      mLocation.setProvider(RANDOM_WALK_LOCATION_PROVIDER);
+      mLocation.setTime(new java.util.Date().getTime());
+
+      if (mService == null) {
+        return;
+      }
+      try {
+        mService.reportOverrideLocation(RANDOM_WALK_LOCATION_PROVIDER, mLocation);
+      } catch (RemoteException e) {
+        Log.e(TAG, "reportOverrideLocation: OverrideLocationService is not available.");
+      }
     }
+  };
+
+  private void initializePeriodicLocationReports() {
+    mLocation = new Location(RANDOM_WALK_LOCATION_PROVIDER);
+    mLocation.setLatitude(START_LATITUDE);
+    mLocation.setLongitude(START_LONGITUDE);
+
+    mTaskTimer
+        .scheduleAtFixedRate(mPeriodicReportTask, LOCATION_REPORT_DELAY, LOCATION_REPORT_PERIOD);
+  }
 }

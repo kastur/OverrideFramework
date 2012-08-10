@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">OverrideService</string>
+    <string name="override_location">Override Location</string>
+    <string name="native_location">Native Location</string>
+    <string name="override_location_service">Override Location Service</string>
+    <string name="override_location_provider">Override Location Provider</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
 </resources>

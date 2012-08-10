@@ -35,7 +35,7 @@ public class DemoOverrideActivity extends Activity {
     b.setOnClickListener(onClickListener);
 
     locMan = new OverrideLocationManager(this.getApplicationContext());
-    senMan = new OverrideSensorManager(this.getApplicationContext());
+    //senMan = new OverrideSensorManager(this.getApplicationContext());
 
     startService(new Intent("android.override.providers.RandomWalkLocationProvider"));
   }
@@ -46,10 +46,10 @@ public class DemoOverrideActivity extends Activity {
     public void onClick(View view) {
       locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-      SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-      Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-      senMan.registerListener(sensorEventListener, accelerometerSensor,
-                              SensorManager.SENSOR_DELAY_NORMAL);
+      SensorManager nativeSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+      Sensor accelerometerSensor = nativeSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+      //senMan.registerListener(sensorEventListener, accelerometerSensor,
+      //                        SensorManager.SENSOR_DELAY_NORMAL);
     }
   };
 

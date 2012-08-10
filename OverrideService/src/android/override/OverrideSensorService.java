@@ -21,7 +21,7 @@ public class OverrideSensorService extends Service {
         super.onCreate();
 
         // TODO: We send out random accelerometer data to apps that request it. We need to permit external providers!
-        mTimer.schedule(mTimerTask, 1000, 1000);
+        mTimer.schedule(mTimerTask, 1000, 10000);
     }
 
     @Override

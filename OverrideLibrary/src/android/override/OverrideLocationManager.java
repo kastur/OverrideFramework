@@ -109,12 +109,24 @@ public class OverrideLocationManager {
     }
 
     public Location getLastKnownLocation(String provider) {
-        Log.i(TAG, "Blocked getLastKnownLocation(String provider). Returned location of empire state!");
-        //return mLocationManager.getLastKnownLocation(provider);
-        Location empire_state = new Location(provider);
-        empire_state.setLatitude(40.748502);
-        empire_state.setLongitude(-73.98445);
-        return empire_state;
+        if (mService == null) {
+          Log.i(TAG, "Blocked getLastKnownLocation(String provider). Returned location of empire state!");
+          //return mLocationManager.getLastKnownLocation(provider);
+          Location empire_state = new Location(provider);
+          empire_state.setLatitude(40.748502);
+          empire_state.setLongitude(-73.98445);
+          empire_state.setProvider(provider);
+          empire_state.setTime(System.currentTimeMillis());
+          return empire_state;
+        } else {
+          try {
+            return mService.getLastKnownLocation(mContext.getPackageName(), provider);
+          } catch(RemoteException ex) {
+            Log.e(TAG, "getLastKnownLocation: DeadObjectException", ex);
+            return new Location(provider);
+          }
+
+        }
     }
 
     // ------------------------------------------------------------------------

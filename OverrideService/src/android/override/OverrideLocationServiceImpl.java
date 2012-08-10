@@ -389,12 +389,17 @@ public class OverrideLocationServiceImpl extends IOverrideLocationService.Stub {
         String provider = location.getProvider();
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
         if (records == null || records.size() == 0) {
+            Log.e(TAG, "UpdateRecords for " + provider + " is empty.");
             return;
         }
 
         if (!mProviders.contains(provider)) {
+            Log.e(TAG, "Provider " + provider + " not in mProviders.");
             return;
         }
+
+        // Broadcast location or status to all listeners
+        location.setProvider(LocationManager.GPS_PROVIDER);
 
         // Update last known location for provider
         Location lastLocation = mLastKnownLocation.get(provider);
@@ -405,9 +410,6 @@ public class OverrideLocationServiceImpl extends IOverrideLocationService.Stub {
         }
 
         ArrayList<Receiver> deadReceivers = null;
-
-        // Broadcast location or status to all listeners
-        location.setProvider(LocationManager.GPS_PROVIDER);
 
         for (UpdateRecord r : records) {
             Receiver receiver = r.mReceiver;
@@ -453,7 +455,9 @@ public class OverrideLocationServiceImpl extends IOverrideLocationService.Stub {
                 if (msg.what == MESSAGE_LOCATION_CHANGED) {
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
-                        Log.d(TAG, "LocationWorkerHandler: Location report from " + location.getProvider());
+                        Log.d(TAG, "LocationWorkerHandler: " + location.getProvider() +
+                                   ": (" + location.getLatitude() +
+                                   ", " + location.getLongitude() + ") ");
 
                         handleLocationChangedLocked(location);
                     }

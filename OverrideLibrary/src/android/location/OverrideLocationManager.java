@@ -1,4 +1,4 @@
-package android.override;
+package android.location;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.override.*;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,12 +30,13 @@ import java.util.List;
 // and when external apps call "Context.getSystemService", they will receive an instance of this class.
 // However, here as a demonstration we have implemented it as a class external to the Android Framework.
 // Applications have to explicitly initialize this class.
-public class OverrideLocationManager {
+public class OverrideLocationManager extends LocationManager {
 
   private static final String TAG = "OverrideLocationManager";
   private Context mContext;
   private IOverrideLocationService mService;
   //private LocationManager mLocationManager;
+
 
   public OverrideLocationManager() {
   }
@@ -56,6 +58,7 @@ public class OverrideLocationManager {
     }
   }
 
+  @Override
   public boolean isProviderEnabled(String provider) {
     if (provider == LocationManager.GPS_PROVIDER) {
       return true;
@@ -64,20 +67,24 @@ public class OverrideLocationManager {
     }
   }
 
+  @Override
   public String getBestProvider(Criteria criteria, boolean i_dont_know_what) {
     return LocationManager.GPS_PROVIDER;
   }
 
+  @Override
   public void requestLocationUpdates(String provider, long minTime, float minDistance,
                                      LocationListener listener) {
     _requestLocationUpdates(provider, false, listener, null);
   }
 
+  @Override
   public void requestLocationUpdates(String provider, long minTime, float minDistance,
                                      LocationListener listener, Looper looper) {
     _requestLocationUpdates(provider, false, listener, looper);
   }
 
+  @Override
   public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
                                      LocationListener listener, Looper looper) {
     Log.i(TAG,
@@ -85,6 +92,7 @@ public class OverrideLocationManager {
     //mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, listener, looper);
   }
 
+  @Override
   public void requestLocationUpdates(String provider, long minTime, float minDistance,
                                      PendingIntent intent) {
     Log.i(TAG,
@@ -92,6 +100,7 @@ public class OverrideLocationManager {
     //mLocationManager.requestLocationUpdates(provider, minTime, minDistance, intent);
   }
 
+  @Override
   public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
                                      PendingIntent intent) {
     Log.i(TAG,
@@ -99,35 +108,42 @@ public class OverrideLocationManager {
     //mLocationManager.requestLocationUpdates(minTime, minDistance, criteria, intent);
   }
 
+  @Override
   public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
     _requestLocationUpdates(provider, true, listener, looper);
   }
 
+  @Override
   public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
     Log.i(TAG,
           "Blocked requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper)");
     //mLocationManager.requestSingleUpdate(criteria, listener, looper);
   }
 
+  @Override
   public void requestSingleUpdate(String provider, PendingIntent intent) {
     Log.i(TAG, "Blocked requestSingleUpdate(String provider, PendingIntent intent)");
     //mLocationManager.requestSingleUpdate(provider, intent);
   }
 
+  @Override
   public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
     Log.i(TAG, "Blocked requestSingleUpdate(Criteria criteria, PendingIntent intent)");
     //mLocationManager.requestSingleUpdate(criteria, intent);
   }
 
+  @Override
   public void removeUpdates(LocationListener listener) {
     _removeUpdates(listener);
   }
 
+  @Override
   public void removeUpdates(PendingIntent intent) {
     Log.i(TAG, "Blocked removeUpdates(PendingIntent intent)");
     //mLocationManager.removeUpdates(intent);
   }
 
+  @Override
   public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
                                 PendingIntent intent) {
     Log.i(TAG,
@@ -135,11 +151,13 @@ public class OverrideLocationManager {
     //mLocationManager.addProximityAlert(latitude, longitude, radius, expiration, intent);
   }
 
+  @Override
   public void removeProximityAlert(PendingIntent intent) {
     Log.i(TAG, "Blocked removeProximityAlert(PendingIntent intent)");
     //mLocationManager.removeProximityAlert(intent);
   }
 
+  @Override
   public Location getLastKnownLocation(String provider) {
     if (mService == null) {
       Log.i(TAG,
@@ -162,27 +180,43 @@ public class OverrideLocationManager {
     }
   }
 
+  @Override
   public LocationProvider getProvider(String provider) {
     Log.i(TAG, "getProvider: return null;");
     return null;
   }
 
+  @Override
   public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
     Log.i(TAG, "addNmeaListener: return false;");
     return false;
   }
 
+  @Override
   public void removeNmeaListener(GpsStatus.NmeaListener listener) {
     Log.i(TAG, "removeNmeaListener: return;");
     return;
   }
 
+  @Override
   public List<String> getAllProviders() {
     Log.i(TAG, "getAllProviders: return {\"gps\"}");
     List<String> list = new ArrayList<String>();
     list.add(LocationManager.GPS_PROVIDER);
     return list;
   }
+
+  @Override
+  public List<String> getProviders(boolean enabledOnly) {
+    return getAllProviders();
+  }
+
+  @Override
+  public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
+    return getAllProviders();
+  }
+
+
 
   // ------------------------------------------------------------------------
 

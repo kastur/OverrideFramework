@@ -10,7 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.override.OverrideLocationManager;
+import android.location.OverrideLocationManager;
 import android.override.OverrideSensorManager;
 import android.util.Log;
 import android.view.View;

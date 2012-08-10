@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.OverrideLocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +16,7 @@ public class OverrideActivity extends Activity {
 
   private static final String TAG = "OverrideActivity";
   LocationManager nativeLocationManager;
-  OverrideLocationManager overrideLocationManager;
+  LocationManager overrideLocationManager;
 
   TextView nativeLocationTextView;
   TextView overrideLocationTextView;

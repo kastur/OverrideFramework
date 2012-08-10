@@ -15,7 +15,7 @@ import java.util.TimerTask;
 /**
  * Periodically reports locations, each randomly perturbed from a starting point.
  */
-public class RandomWalkLocationProvider extends Service {
+public class RandomWalkLocationProvider extends LocationProviderService {
 
   private static final String TAG = "OverrideRandomWalkLocationProvider";
   public static final String RANDOM_WALK_LOCATION_PROVIDER = "RandomWalkLocationProvider";
@@ -28,74 +28,33 @@ public class RandomWalkLocationProvider extends Service {
   private static final int LOCATION_REPORT_PERIOD = 5000; // report new location every 5 seconds.
   private static final double RANDOM_WALK_MAX_MOVE = 0.001; // 1/1000 of a degree
 
-  @Override
-  public IBinder onBind(Intent intent) {
-    return null;
-  }
+  Location mLocation;
+  Timer mTaskTimer = new Timer("PeriodicRandomWalkLocationUpdates");
 
-  @Override
-  public int onStartCommand(Intent intent, int flags, int startId) {
-    Log.v(TAG, "onStartCommand");
-    return super.onStartCommand(intent, flags, startId);
-  }
 
   @Override
   public void onCreate() {
     super.onCreate();
-    Log.v(TAG, "onCreate");
-    bindToOverrideLocationManager();
-    initializePeriodicLocationReports();
+    mLocation = new Location(RANDOM_WALK_LOCATION_PROVIDER);
+    mLocation.setLatitude(START_LATITUDE);
+    mLocation.setLongitude(START_LONGITUDE);
+    mTaskTimer.scheduleAtFixedRate(
+        mPeriodicReportTask, LOCATION_REPORT_DELAY, LOCATION_REPORT_PERIOD);
   }
 
   @Override
   public void onDestroy() {
-    Log.v(TAG, "onDestroy");
     mTaskTimer.cancel();
-    unregisterAsProvider();
-    unbindService(mServiceConnection);
     super.onDestroy();
   }
 
-  private void registerAsProvider() {
-    try {
-      mService.addOverrideProvider(RANDOM_WALK_LOCATION_PROVIDER);
-    } catch (RemoteException e) {
-      Log.e(TAG, "addOverrideProvider: OverrideLocationService is not available.");
-    }
+  @Override
+  protected String getName() {
+    return RANDOM_WALK_LOCATION_PROVIDER;
   }
-
-  private void unregisterAsProvider() {
-    try {
-      mService.removeOverrideProvider(RANDOM_WALK_LOCATION_PROVIDER);
-    } catch (RemoteException e) {
-      Log.e(TAG, "removeOverrideProvider: OverrideLocationService is not available.");
-    }
-  }
-
-  IOverrideLocationService mService;
-  ServiceConnection mServiceConnection = new ServiceConnection() {
-
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder binder) {
-      mService = IOverrideLocationService.Stub.asInterface(binder);
-      registerAsProvider();
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-      mService = null;
-    }
-  };
-
-  private void bindToOverrideLocationManager() {
-    Intent serviceIntent = new Intent("android.override.OverrideLocationService");
-    bindService(serviceIntent, mServiceConnection, BIND_DEBUG_UNBIND);
-  }
-
-  Location mLocation;
-  Timer mTaskTimer = new Timer("PeriodicRandomWalkLocationUpdates");
 
   TimerTask mPeriodicReportTask = new TimerTask() {
+
     @Override
     public void run() {
 
@@ -106,23 +65,15 @@ public class RandomWalkLocationProvider extends Service {
       mLocation.setProvider(RANDOM_WALK_LOCATION_PROVIDER);
       mLocation.setTime(new java.util.Date().getTime());
 
-      if (mService == null) {
+      if (getService() == null) {
         return;
       }
+
       try {
-        mService.reportOverrideLocation(RANDOM_WALK_LOCATION_PROVIDER, mLocation);
+        getService().reportOverrideLocation(RANDOM_WALK_LOCATION_PROVIDER, mLocation);
       } catch (RemoteException e) {
         Log.e(TAG, "reportOverrideLocation: OverrideLocationService is not available.");
       }
     }
   };
-
-  private void initializePeriodicLocationReports() {
-    mLocation = new Location(RANDOM_WALK_LOCATION_PROVIDER);
-    mLocation.setLatitude(START_LATITUDE);
-    mLocation.setLongitude(START_LONGITUDE);
-
-    mTaskTimer
-        .scheduleAtFixedRate(mPeriodicReportTask, LOCATION_REPORT_DELAY, LOCATION_REPORT_PERIOD);
-  }
 }

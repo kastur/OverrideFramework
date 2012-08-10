@@ -1,14 +1,12 @@
-package android.override.providers;
+package android.override;
 
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.override.IOverrideLocationService;
 import android.util.Log;
 
 import java.util.Timer;
@@ -19,7 +17,7 @@ import java.util.TimerTask;
  */
 public class RandomWalkLocationProvider extends Service {
 
-  private static final String TAG = "RandomWalkLocationProvider";
+  private static final String TAG = "OverrideRandomWalkLocationProvider";
   public static final String RANDOM_WALK_LOCATION_PROVIDER = "RandomWalkLocationProvider";
 
   // Start out at the Empire State Building
@@ -28,7 +26,7 @@ public class RandomWalkLocationProvider extends Service {
 
   private static final int LOCATION_REPORT_DELAY = 500; // half a second.
   private static final int LOCATION_REPORT_PERIOD = 5000; // report new location every 5 seconds.
-  private static final double RANDOM_WALK_MAX_MOVE = 0.0001; // 1/10000 of a degree, around 40 feet.
+  private static final double RANDOM_WALK_MAX_MOVE = 0.001; // 1/1000 of a degree
 
   @Override
   public IBinder onBind(Intent intent) {
@@ -36,16 +34,26 @@ public class RandomWalkLocationProvider extends Service {
   }
 
   @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+    Log.v(TAG, "onStartCommand");
+    return super.onStartCommand(intent, flags, startId);
+  }
+
+  @Override
   public void onCreate() {
     super.onCreate();
+    Log.v(TAG, "onCreate");
     bindToOverrideLocationManager();
     initializePeriodicLocationReports();
   }
 
   @Override
   public void onDestroy() {
-    super.onDestroy();
+    Log.v(TAG, "onDestroy");
+    mTaskTimer.cancel();
     unregisterAsProvider();
+    unbindService(mServiceConnection);
+    super.onDestroy();
   }
 
   private void registerAsProvider() {
@@ -81,8 +89,7 @@ public class RandomWalkLocationProvider extends Service {
 
   private void bindToOverrideLocationManager() {
     Intent serviceIntent = new Intent("android.override.OverrideLocationService");
-    bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-    startService(serviceIntent);
+    bindService(serviceIntent, mServiceConnection, BIND_DEBUG_UNBIND);
   }
 
   Location mLocation;

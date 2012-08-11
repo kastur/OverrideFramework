@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.OverrideLocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,8 +25,8 @@ public class OverrideActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    nativeLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-    overrideLocationManager = new OverrideLocationManager(this);
+    nativeLocationManager = (LocationManager) getSystemService("native_location");
+    overrideLocationManager = (LocationManager) getSystemService("location");
 
     nativeLocationTextView = (TextView) findViewById(R.id.nativeLocation);
     overrideLocationTextView = (TextView) findViewById(R.id.overrideLocation);

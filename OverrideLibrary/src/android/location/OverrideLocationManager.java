@@ -5,19 +5,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Criteria;
-import android.location.GpsStatus;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
-import android.override.*;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.override.IOverrideLocationListener;
+import android.override.IOverrideLocationService;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -37,11 +32,8 @@ public class OverrideLocationManager extends LocationManager {
   private IOverrideLocationService mService;
   //private LocationManager mLocationManager;
 
-
-  public OverrideLocationManager() {
-  }
-
   public OverrideLocationManager(Context context) {
+    super(null);
     Log.i(TAG, context.getPackageName() + " constructed a new OverrideLocationManager");
     mContext = context;
     //mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -208,15 +200,81 @@ public class OverrideLocationManager extends LocationManager {
 
   @Override
   public List<String> getProviders(boolean enabledOnly) {
+    Log.v(TAG, "getAllProviders");
     return getAllProviders();
   }
 
   @Override
   public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
+    Log.v(TAG, "getAllProviders");
     return getAllProviders();
   }
 
+  @Override
+  public boolean addGpsStatusListener(GpsStatus.Listener listener) {
+    Log.v(TAG, "addGpsStatusListener");
+    return false;
+  }
 
+  @Override
+  public void removeGpsStatusListener(GpsStatus.Listener listener) {
+    Log.v(TAG, "removeGpsStatusListener");
+  }
+
+  @Override
+  public GpsStatus getGpsStatus(GpsStatus status) {
+    Log.v(TAG, "getGpsStatus");
+    return null;
+  }
+
+  @Override
+  public boolean sendExtraCommand(String provider, String command, Bundle extras) {
+    Log.v(TAG, "sendExtraCommand: return false");
+    return false;
+  }
+
+  @Override
+  public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
+                              boolean requiresCell, boolean hasMonetaryCost,
+                              boolean supportsAltitude, boolean supportsSpeed,
+                              boolean supportsBearing, int powerRequirement, int accuracy) {
+    Log.v(TAG, "addTestProvider");
+  }
+
+  @Override
+  public void removeTestProvider(String provider) {
+    Log.v(TAG, "removeTestProvider");
+  }
+
+  @Override
+  public void setTestProviderLocation(String provider, Location loc) {
+    Log.v(TAG, "setTestProviderLocation");
+  }
+
+  @Override
+  public void clearTestProviderLocation(String provider) {
+    Log.v(TAG, "clearTestProviderLocation");
+  }
+
+  @Override
+  public void setTestProviderEnabled(String provider, boolean enabled) {
+    Log.v(TAG, "setTestProviderEnabled");
+  }
+
+  @Override
+  public void clearTestProviderEnabled(String provider) {
+    Log.v(TAG, "clearTestProviderEnabled");
+  }
+
+  @Override
+  public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
+    Log.v(TAG, "setTestProviderStatus");
+  }
+
+  @Override
+  public void clearTestProviderStatus(String provider) {
+    Log.v(TAG, "clearTestProviderStatus");
+  }
 
   // ------------------------------------------------------------------------
 

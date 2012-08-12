@@ -174,8 +174,8 @@ public class OverrideLocationManager extends LocationManager {
 
   @Override
   public LocationProvider getProvider(String provider) {
-    Log.i(TAG, "getProvider: return null;");
-    return null;
+    Log.i(TAG, "getProvider: return new LocationProvider();");
+    return new DefaultLocationProvider();
   }
 
   @Override
@@ -472,5 +472,59 @@ public class OverrideLocationManager extends LocationManager {
       */
     }
   }
+
+  private class DefaultLocationProvider extends LocationProvider {
+
+    public DefaultLocationProvider() {
+      Log.i(TAG, "Constructing DefaultLocationProvider");
+    }
+
+    @Override
+    public boolean requiresNetwork() {
+      return false;
+    }
+
+    @Override
+    public boolean requiresSatellite() {
+      return false;
+    }
+
+    @Override
+    public boolean requiresCell() {
+      return false;
+    }
+
+    @Override
+    public boolean hasMonetaryCost() {
+      return false;
+    }
+
+    @Override
+    public boolean supportsAltitude() {
+      return false;
+    }
+
+    @Override
+    public boolean supportsSpeed() {
+      return false;
+    }
+
+    @Override
+    public boolean supportsBearing() {
+      return false;
+    }
+
+    @Override
+    public int getPowerRequirement() {
+      return Criteria.POWER_LOW;
+    }
+
+    @Override
+    public int getAccuracy() {
+      return Criteria.ACCURACY_FINE;
+    }
+  }
+
+  ;
 
 }

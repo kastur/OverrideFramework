@@ -1,0 +1,2 @@
+echo "Decode framework.jar"
+apktool decode inout/framework.jar inout/framework_decoded

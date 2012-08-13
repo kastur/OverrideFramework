@@ -1,0 +1,2 @@
+echo "Build framework_new.jar"
+apktool build inout/framework_decoded/ inout/framework_new.jar

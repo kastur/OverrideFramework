@@ -1,0 +1,2 @@
+echo "Copy framework.jar into inout"
+cp framework.jar inout/framework.jar

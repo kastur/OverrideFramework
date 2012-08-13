@@ -1,0 +1,2 @@
+echo "Copy OverrideService.apk from ../out into inout"
+cp ../out/production/OverrideService/OverrideService.apk inout/

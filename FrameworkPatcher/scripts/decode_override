@@ -1,0 +1,2 @@
+echo "Decode OverrideService.apk"
+apktool decode --no-res inout/OverrideService.apk inout/override_decoded

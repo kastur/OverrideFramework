@@ -1,0 +1,28 @@
+--- inout/framework_decoded/smali/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
++++ inout/framework_decoded/smali/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
+@@ -301,7 +301,7 @@
+     invoke-static {v0, v1}, Landroid/app/ContextImpl;->registerService(Ljava/lang/String;Landroid/app/ContextImpl$ServiceFetcher;)V
+ 
+     .line 364
+-    const-string v0, "location"
++    const-string v0, "native_location"
+ 
+     new-instance v1, Landroid/app/ContextImpl$20;
+ 
+@@ -309,6 +309,16 @@
+ 
+     invoke-static {v0, v1}, Landroid/app/ContextImpl;->registerService(Ljava/lang/String;Landroid/app/ContextImpl$ServiceFetcher;)V
+ 
++
++    .line 364
++    const-string v0, "location"
++
++    new-instance v1, Landroid/app/ContextImpl$Override;
++
++    invoke-direct {v1}, Landroid/app/ContextImpl$Override;-><init>()V
++
++    invoke-static {v0, v1}, Landroid/app/ContextImpl;->registerService(Ljava/lang/String;Landroid/app/ContextImpl$ServiceFetcher;)V
++
+     .line 370
+     const-string/jumbo v0, "netpolicy"
+ 

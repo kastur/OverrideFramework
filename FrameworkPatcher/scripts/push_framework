@@ -1,0 +1,10 @@
+echo "Remounting /system partition in r+w mode"
+adb remount
+
+echo "Push framework_new.jar in to /system/framework/framework.jar"
+adb push inout/framework_new.jar /system/framework/framework.jar
+
+echo "Flush the dalvik-cache"
+adb shell rm data/dalvik-cache/*
+
+echo "NOTE: Must 'adb reboot' for changes to take effect!"

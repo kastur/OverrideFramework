@@ -12,7 +12,6 @@ import android.os.RemoteException;
 import android.override.IOverrideCommandListener;
 import android.override.IOverrideCommander;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -33,7 +32,8 @@ public class OverrideLocationManager extends LocationManager {
     mContext = context;
     mWrappedListeners = new HashMap<LocationListener, LocationListener>();
     Intent bindIntent = new Intent("android.override.OverrideCommanderService");
-    mContext.bindService(bindIntent, mCommanderConnection, Context.BIND_AUTO_CREATE | Context.BIND_DEBUG_UNBIND);
+    mContext.bindService(bindIntent, mCommanderConnection,
+                         Context.BIND_AUTO_CREATE | Context.BIND_DEBUG_UNBIND);
   }
 
   @Override
@@ -181,28 +181,32 @@ public class OverrideLocationManager extends LocationManager {
     LocationListener wrapped_listener = new LocationListener() {
       @Override
       public void onLocationChanged(Location location) {
-        if (!mSuppressUpdates)
+        if (!mSuppressUpdates) {
           final_listener.onLocationChanged(location);
-        else
+        } else {
           Log.d(TAG, "SUPPRESSED location: " + mContext.getPackageName());
+        }
       }
 
       @Override
       public void onStatusChanged(String s, int i, Bundle bundle) {
-        if (!mSuppressUpdates)
+        if (!mSuppressUpdates) {
           final_listener.onStatusChanged(s, i, bundle);
+        }
       }
 
       @Override
       public void onProviderEnabled(String s) {
-        if (!mSuppressUpdates)
+        if (!mSuppressUpdates) {
           final_listener.onProviderEnabled(s);
+        }
       }
 
       @Override
       public void onProviderDisabled(String s) {
-        if (!mSuppressUpdates)
+        if (!mSuppressUpdates) {
           final_listener.onProviderDisabled(s);
+        }
       }
     };
     mWrappedListeners.put(listener, wrapped_listener);
@@ -224,7 +228,7 @@ public class OverrideLocationManager extends LocationManager {
     @Override
     public void onCommand(Bundle command) throws RemoteException {
       String action = command.getString("COMMAND", "RELEASE");
-      if  (action.equals("SUPPRESS")) {
+      if (action.equals("SUPPRESS")) {
         mSuppressUpdates = true;
         Log.d(TAG, "SUPPRESS location updates for " + mContext.getPackageName());
       } else if (action.equals("RELEASE")) {

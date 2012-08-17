@@ -94,12 +94,12 @@ public class DemoOverrideActivity extends Activity {
 
   private void onCreateOverrideStuff() {
     {
-      Button b = (Button)findViewById(R.id.btnSuppress);
+      Button b = (Button) findViewById(R.id.btnSuppress);
       b.setOnClickListener(onSuppressClickListener);
     }
 
     {
-      Button b = (Button)findViewById(R.id.btnReset);
+      Button b = (Button) findViewById(R.id.btnReset);
       b.setOnClickListener(onResetClickListener);
     }
   }

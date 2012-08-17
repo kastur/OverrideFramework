@@ -1,26 +1,11 @@
 package android.override;
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.PrintWriterPrinter;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 
 public class OverrideCommander extends IOverrideCommander.Stub {
@@ -38,15 +23,19 @@ public class OverrideCommander extends IOverrideCommander.Stub {
   }
 
   @Override
-  public synchronized void registerCommandListener(String packageName, IOverrideCommandListener listener) throws RemoteException {
+  public synchronized void registerCommandListener(String packageName,
+                                                   IOverrideCommandListener listener)
+      throws RemoteException {
     mListeners.add(listener);
-    if (!mListenersByPackage.containsKey(packageName))
+    if (!mListenersByPackage.containsKey(packageName)) {
       mListenersByPackage.put(packageName, new HashSet<IOverrideCommandListener>());
+    }
     mListenersByPackage.get(packageName).add(listener);
   }
 
   @Override
-  public void removeCommandListener(String packageName, IOverrideCommandListener listener) throws RemoteException {
+  public void removeCommandListener(String packageName, IOverrideCommandListener listener)
+      throws RemoteException {
     mListeners.remove(listener);
     mListenersByPackage.get(packageName).remove(listener);
   }

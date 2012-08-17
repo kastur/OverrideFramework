@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/OverrideDemo/OverrideDemo.iml" filepath="$PROJECT_DIR$/OverrideDemo/OverrideDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/OverrideLibrary/OverrideLibrary.iml" filepath="$PROJECT_DIR$/OverrideLibrary/OverrideLibrary.iml" />
-      <module fileurl="file://$PROJECT_DIR$/OverrideProviders/OverrideProviders.iml" filepath="$PROJECT_DIR$/OverrideProviders/OverrideProviders.iml" />
       <module fileurl="file://$PROJECT_DIR$/OverrideService/OverrideService.iml" filepath="$PROJECT_DIR$/OverrideService/OverrideService.iml" />
     </modules>
   </component>

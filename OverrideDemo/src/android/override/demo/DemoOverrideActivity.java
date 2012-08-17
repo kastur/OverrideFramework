@@ -2,16 +2,14 @@ package android.override.demo;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.OverrideLocationManager;
 import android.os.Bundle;
-import android.override.OverrideSensorManager;
+import android.os.IBinder;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,37 +19,48 @@ public class DemoOverrideActivity extends Activity {
 
   private static final String TAG = "DemoOverrideActivity";
 
-  OverrideLocationManager locMan;
-  OverrideSensorManager senMan;
-
-  /**
-   * Called when the activity is first created.
-   */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    Button b = (Button) findViewById(R.id.btnStart);
-    b.setOnClickListener(onClickListener);
-
-    locMan = new OverrideLocationManager(this.getApplicationContext());
-    //senMan = new OverrideSensorManager(this.getApplicationContext());
-
-    startService(new Intent("android.override.providers.RandomWalkLocationProvider"));
+    onCreateLocationStuff();
+    onCreateOverrideStuff();
   }
 
 
-  android.view.View.OnClickListener onClickListener = new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-      locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+  @Override
+  protected void onResume() {
+    super.onResume();
+    onResumeLocationStuff();
+  }
 
-      SensorManager nativeSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-      Sensor accelerometerSensor = nativeSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-      //senMan.registerListener(sensorEventListener, accelerometerSensor,
-      //                        SensorManager.SENSOR_DELAY_NORMAL);
-    }
-  };
+  @Override
+  protected void onPause() {
+    onPauseLocationStuff();
+    super.onPause();
+
+  }
+
+  // ----------------------------------------------------------------------------------------------
+  //        LOCATION STUFF
+  // ----------------------------------------------------------------------------------------------
+  private LocationManager mLocationManager;
+
+  private void onCreateLocationStuff() {
+    IBinder binder = ServiceManager.getService(LOCATION_SERVICE);
+    ILocationManager service = ILocationManager.Stub.asInterface(binder);
+    mLocationManager = new OverrideLocationManager(this, service);
+  }
+
+  private void onPauseLocationStuff() {
+    mLocationManager.removeUpdates(locationListener);
+  }
+
+  private void onResumeLocationStuff() {
+    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
+                                            locationListener);
+  }
+
 
   LocationListener locationListener = new LocationListener() {
     @Override
@@ -79,20 +88,41 @@ public class DemoOverrideActivity extends Activity {
     }
   };
 
-  SensorEventListener sensorEventListener = new SensorEventListener() {
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-      String
-          accelText =
-          "x = " + sensorEvent.values[0] + ", y = " + sensorEvent.values[1] + ", z = "
-          + sensorEvent.values[2];
-      Log.d(TAG, accelText);
-      TextView textView = (TextView) findViewById(R.id.txtAccel);
-      textView.setText(accelText);
+  // ----------------------------------------------------------------------------------------------
+  //        SUPPRESS / ALLOW LOCATION UPDATES TO THIS APP
+  // ----------------------------------------------------------------------------------------------
+
+  private void onCreateOverrideStuff() {
+    {
+      Button b = (Button)findViewById(R.id.btnSuppress);
+      b.setOnClickListener(onSuppressClickListener);
     }
 
+    {
+      Button b = (Button)findViewById(R.id.btnReset);
+      b.setOnClickListener(onResetClickListener);
+    }
+  }
+
+  android.view.View.OnClickListener onSuppressClickListener = new View.OnClickListener() {
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
+    public void onClick(View view) {
+      Intent suppressIntent = new Intent("android.override.OverrideCommanderService");
+      suppressIntent.putExtra("COMMAND", "SUPPRESS");
+      suppressIntent.putExtra("PACKAGE", getPackageName());
+      startService(suppressIntent);
     }
   };
+
+  android.view.View.OnClickListener onResetClickListener = new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+      Intent releaseIntent = new Intent("android.override.OverrideCommanderService");
+      releaseIntent.putExtra("COMMAND", "RELEASE");
+      releaseIntent.putExtra("PACKAGE", getPackageName());
+      startService(releaseIntent);
+    }
+  };
+
+  // ----------------------------------------------------------------------------------------------
 }

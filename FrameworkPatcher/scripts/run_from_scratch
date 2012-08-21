@@ -1,4 +1,5 @@
 rm -rf inout
+mkdir inout
 
 copy_framework
 decode_framework

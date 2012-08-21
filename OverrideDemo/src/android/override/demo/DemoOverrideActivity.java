@@ -89,7 +89,7 @@ public class DemoOverrideActivity extends Activity {
   };
 
   // ----------------------------------------------------------------------------------------------
-  //        SUPPRESS / ALLOW LOCATION UPDATES TO THIS APP
+  //        SUPPRESS / PERTURB / ALLOW LOCATION UPDATES TO THIS APP
   // ----------------------------------------------------------------------------------------------
 
   private void onCreateOverrideStuff() {
@@ -102,13 +102,18 @@ public class DemoOverrideActivity extends Activity {
       Button b = (Button) findViewById(R.id.btnReset);
       b.setOnClickListener(onResetClickListener);
     }
+
+    {
+      Button b = (Button) findViewById(R.id.btnPerturb);
+      b.setOnClickListener(onPerturbClickListener);
+    }
   }
 
   android.view.View.OnClickListener onSuppressClickListener = new View.OnClickListener() {
     @Override
     public void onClick(View view) {
       Intent suppressIntent = new Intent("android.override.OverrideCommanderService");
-      suppressIntent.putExtra("COMMAND", "SUPPRESS");
+      suppressIntent.putExtra("COMMAND", OverrideLocationManager.COMMAND_SUPPRESS);
       suppressIntent.putExtra("PACKAGE", getPackageName());
       startService(suppressIntent);
     }
@@ -118,11 +123,20 @@ public class DemoOverrideActivity extends Activity {
     @Override
     public void onClick(View view) {
       Intent releaseIntent = new Intent("android.override.OverrideCommanderService");
-      releaseIntent.putExtra("COMMAND", "RELEASE");
+      releaseIntent.putExtra("COMMAND", OverrideLocationManager.COMMAND_RELEASE);
       releaseIntent.putExtra("PACKAGE", getPackageName());
       startService(releaseIntent);
     }
   };
 
-  // ----------------------------------------------------------------------------------------------
+  android.view.View.OnClickListener onPerturbClickListener = new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+      Intent perturbIntent = new Intent("android.override.OverrideCommanderService");
+      perturbIntent.putExtra("COMMAND", OverrideLocationManager.COMMAND_PERTURB);
+      perturbIntent.putExtra("perturb_variance", 5.0);
+      perturbIntent.putExtra("PACKAGE", getPackageName());
+      startService(perturbIntent);
+    }
+  };
 }

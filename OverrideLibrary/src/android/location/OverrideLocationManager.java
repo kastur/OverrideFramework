@@ -14,6 +14,7 @@ import android.override.IOverrideCommander;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Random;
 
 // The OverrideLocationManager is a bare-bones version of the default Android LocationManager.
 // If implemented as part of the Android Framework, we will make this class extend LocationManager directly,
@@ -23,15 +24,29 @@ import java.util.HashMap;
 public class OverrideLocationManager extends LocationManager {
 
   private static final String TAG = "OverrideLocationManager";
-  private Context mContext;
 
-  private final HashMap<LocationListener, LocationListener> mWrappedListeners;
+  public static final int COMMAND_RELEASE = 0;
+  public static final int COMMAND_SUPPRESS = 1;
+  public static final int COMMAND_PERTURB = 2;
+
+  public static final String PERTURB_VARIANCE = "perturb_variance";
+
+  private Context mContext;
+  private HashMap<LocationListener, LocationListener> mWrappedListeners;
+  private IOverrideCommander mCommander;
+  private int mCommandState;
+  private Random mRandom;
+  private double mVariance;
 
   public OverrideLocationManager(Context context, ILocationManager service) {
     super(service);
     mContext = context;
     mWrappedListeners = new HashMap<LocationListener, LocationListener>();
+    mCommandState = COMMAND_RELEASE;
+
     Intent bindIntent = new Intent("android.override.OverrideCommanderService");
+
+
     mContext.bindService(bindIntent, mCommanderConnection,
                          Context.BIND_AUTO_CREATE | Context.BIND_DEBUG_UNBIND);
   }
@@ -172,43 +187,69 @@ public class OverrideLocationManager extends LocationManager {
     return false;
   }
 
-  private LocationListener getWrappedListener(LocationListener listener) {
+  private LocationListener getWrappedListener(final LocationListener listener) {
+
     if (mWrappedListeners.containsKey(listener)) {
       return mWrappedListeners.get(listener);
     }
 
-    final LocationListener final_listener = listener;
     LocationListener wrapped_listener = new LocationListener() {
       @Override
       public void onLocationChanged(Location location) {
-        if (!mSuppressUpdates) {
-          final_listener.onLocationChanged(location);
-        } else {
-          Log.d(TAG, "SUPPRESSED location: " + mContext.getPackageName());
+        switch(mCommandState) {
+          case COMMAND_RELEASE:
+            listener.onLocationChanged(location);
+            break;
+          case COMMAND_PERTURB:
+            Location perturbed_location = getPerturbedLocation(location);
+            listener.onLocationChanged(perturbed_location);
+            break;
+          case COMMAND_SUPPRESS:
+            // Don't send the update. Do nothing.
+            break;
         }
       }
 
       @Override
       public void onStatusChanged(String s, int i, Bundle bundle) {
-        if (!mSuppressUpdates) {
-          final_listener.onStatusChanged(s, i, bundle);
+        switch (mCommandState) {
+          case COMMAND_RELEASE:
+          case COMMAND_PERTURB:
+            listener.onStatusChanged(s, i, bundle);
+            break;
+          case COMMAND_SUPPRESS:
+            // Don't send the update. Do nothing.
+            break;
         }
       }
 
       @Override
       public void onProviderEnabled(String s) {
-        if (!mSuppressUpdates) {
-          final_listener.onProviderEnabled(s);
+        switch (mCommandState) {
+          case COMMAND_RELEASE:
+          case COMMAND_PERTURB:
+            listener.onProviderEnabled(s);
+            break;
+          case COMMAND_SUPPRESS:
+            // Don't send the update. Do nothing.
+            break;
         }
       }
 
       @Override
       public void onProviderDisabled(String s) {
-        if (!mSuppressUpdates) {
-          final_listener.onProviderDisabled(s);
+        switch (mCommandState) {
+          case COMMAND_RELEASE:
+          case COMMAND_PERTURB:
+            listener.onProviderDisabled(s);
+            break;
+          case COMMAND_SUPPRESS:
+            // Don't send the update. Do nothing.
+            break;
         }
       }
     };
+
     mWrappedListeners.put(listener, wrapped_listener);
     return wrapped_listener;
   }
@@ -221,25 +262,8 @@ public class OverrideLocationManager extends LocationManager {
     }
   }
 
-  private IOverrideCommander mCommander = null;
-  private boolean mSuppressUpdates = false;
-
-  private IOverrideCommandListener mCommandListener = new IOverrideCommandListener.Stub() {
-    @Override
-    public void onCommand(Bundle command) throws RemoteException {
-      String action = command.getString("COMMAND", "RELEASE");
-      if (action.equals("SUPPRESS")) {
-        mSuppressUpdates = true;
-        Log.d(TAG, "SUPPRESS location updates for " + mContext.getPackageName());
-      } else if (action.equals("RELEASE")) {
-        mSuppressUpdates = false;
-        Log.d(TAG, "RELEASE location updates for " + mContext.getPackageName());
-      }
-
-    }
-  };
-
   private ServiceConnection mCommanderConnection = new ServiceConnection() {
+
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder binder) {
       mCommander = IOverrideCommander.Stub.asInterface(binder);
@@ -257,4 +281,56 @@ public class OverrideLocationManager extends LocationManager {
       mCommander = null;
     }
   };
+
+  private IOverrideCommandListener mCommandListener = new IOverrideCommandListener.Stub() {
+
+    @Override
+    public void onCommand(Bundle command) throws RemoteException {
+      final int action = command.getInt("COMMAND", COMMAND_RELEASE);
+      switch (action) {
+        case COMMAND_RELEASE:
+          handleCommandRelease(command);
+          break;
+        case COMMAND_SUPPRESS:
+          handleCommandSuppress(command);
+          break;
+        case COMMAND_PERTURB:
+          handleCommandPerturb(command);
+          break;
+      }
+    }
+  };
+
+  private Location getPerturbedLocation(Location location) {
+    // TODO: Perturb each location component independently with a different variance.
+    final double lat_noise = mRandom.nextGaussian() * mVariance;
+    final double lon_noise = mRandom.nextGaussian() * mVariance;
+    final double alt_noise = mRandom.nextGaussian() * mVariance;
+
+    Location perturbed_location = new Location(location);
+    perturbed_location.setLatitude(perturbed_location.getLatitude() + lat_noise);
+    perturbed_location.setLongitude(perturbed_location.getLongitude() + lon_noise);
+    perturbed_location.setAltitude(perturbed_location.getAltitude() + alt_noise);
+
+    return perturbed_location;
+  }
+
+
+  private void handleCommandPerturb(Bundle command) {
+    mCommandState = COMMAND_PERTURB;
+    mRandom = new Random();
+    mVariance = command.getDouble(PERTURB_VARIANCE, 0.0);
+    if (mVariance == 0.0) {
+      Log.w(TAG, "WATCH OUT! PERTURB_VARIANCE = 0.0. Not going to actually perturb anything!");
+    }
+  }
+
+  private void handleCommandRelease(Bundle unused) {
+    mCommandState = COMMAND_RELEASE;
+  }
+
+  private void handleCommandSuppress(Bundle unused) {
+    mCommandState = COMMAND_SUPPRESS;
+  }
+
 }

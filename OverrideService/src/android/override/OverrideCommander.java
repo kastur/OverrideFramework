@@ -16,7 +16,6 @@ public class OverrideCommander extends IOverrideCommander.Stub {
   private HashMap<String, HashSet<IOverrideCommandListener>> mListenersByPackage =
       new HashMap<String, HashSet<IOverrideCommandListener>>();
 
-
   @Override
   public void onStatusChanged(String packageName, Bundle data) throws RemoteException {
 
@@ -41,7 +40,13 @@ public class OverrideCommander extends IOverrideCommander.Stub {
   }
 
   public void onCommand(String packageName, Bundle data) {
-    for (IOverrideCommandListener listener : mListenersByPackage.get(packageName)) {
+    HashSet<IOverrideCommandListener> listeners = mListenersByPackage.get(packageName);
+    if (listeners == null) {
+      Log.v(TAG, "No listeners registered for " + packageName);
+      return;
+    }
+
+    for (IOverrideCommandListener listener : listeners) {
       try {
         listener.onCommand(data);
       } catch (RemoteException ex) {

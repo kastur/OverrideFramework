@@ -33,6 +33,14 @@
             android:paddingTop="2pt"
             android:text="Click to suppress data sent to this app"/>
 
+    <Button android:id="@+id/btnPerturb"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12pt"
+            android:paddingBottom="10pt"
+            android:paddingTop="2pt"
+            android:text="Click to perturb data sent to this app"/>
+
     <Button android:id="@+id/btnReset"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

@@ -121,6 +121,10 @@ public class OverrideLocationManager extends LocationManager {
     //super.requestSingleUpdate(criteria, intent);
   }
 
+  public boolean checkListenerRegistered(LocationListener listener) {
+    return mWrappedListeners.containsKey(listener);
+  }
+
   @Override
   public void removeUpdates(LocationListener listener) {
     LocationListener wrapped_listener = getWrappedListener(listener);
@@ -331,6 +335,14 @@ public class OverrideLocationManager extends LocationManager {
 
   private void handleCommandSuppress(Bundle unused) {
     mCommandState = COMMAND_SUPPRESS;
+  }
+
+  public IOverrideCommandListener getCommandListener() {
+    return mCommandListener;
+  }
+
+  public int getCommandState() {
+    return mCommandState;
   }
 
 }

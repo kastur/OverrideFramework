@@ -33,9 +33,16 @@
 
     .prologue
     .line 417
-    new-instance v0, Landroid/location/OverrideLocationManager;
+    const-string v1, "location"
+    invoke-static {v1}, Landroid/os/ServiceManager;->getService(Ljava/lang/String;)Landroid/os/IBinder;
+    move-result-object v0
+    .local v0, binder:Landroid/os/IBinder;
 
-    invoke-direct {v0, p1}, Landroid/location/OverrideLocationManager;-><init>(Landroid/content/Context;)V
+    invoke-static {v0}, Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ILocationManager;
+    move-result-object v1
+
+    new-instance v0, Landroid/location/OverrideLocationManager;
+    invoke-direct {v0, p1, v1}, Landroid/location/OverrideLocationManager;-><init>(Landroid/content/Context;Landroid/location/ILocationManager;)V
 
     return-object v0
 .end method

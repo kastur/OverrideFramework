@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+
     <application android:icon="@drawable/icon" android:label="@string/app_name">
 
         <!-- TODO: Require a permission to be able to bind to the service -->

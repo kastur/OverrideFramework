@@ -130,9 +130,9 @@ public class OverrideLocationManager extends LocationManager {
 
   @Override
   public void removeUpdates(LocationListener listener) {
-    LocationListener wrapped_listener = getWrappedListener(listener);
+    final LocationListener wrapped_listener = getWrappedListener(listener);
     super.removeUpdates(wrapped_listener);
-    deleteWrappedListener(wrapped_listener);
+    mWrappedListeners.remove(listener);
   }
 
   @Override
@@ -157,7 +157,7 @@ public class OverrideLocationManager extends LocationManager {
 
   @Override
   public Location getLastKnownLocation(String provider) {
-    return super.getLastKnownLocation(provider);
+    return mLastKnownLocation.get(provider);
   }
 
   @Override
@@ -196,19 +196,22 @@ public class OverrideLocationManager extends LocationManager {
 
   private LocationListener getWrappedListener(final LocationListener listener) {
 
-    if (mWrappedListeners.containsKey(listener)) {
-      return mWrappedListeners.get(listener);
-    }
+    LocationListener wrapped_listener = mWrappedListeners.get(listener);
 
-    LocationListener wrapped_listener = new LocationListener() {
+    if (wrapped_listener != null)
+      return wrapped_listener;
+
+    wrapped_listener = new LocationListener() {
       @Override
       public void onLocationChanged(Location location) {
         switch(mCommandState) {
           case COMMAND_RELEASE:
+            mLastKnownLocation.put(location.getProvider(), new Location(location));
             listener.onLocationChanged(location);
             break;
           case COMMAND_PERTURB:
             Location perturbed_location = getPerturbedLocation(location);
+            mLastKnownLocation.put(location.getProvider(), perturbed_location);
             listener.onLocationChanged(perturbed_location);
             break;
           case COMMAND_SUPPRESS:
@@ -263,14 +266,6 @@ public class OverrideLocationManager extends LocationManager {
 
     mWrappedListeners.put(listener, wrapped_listener);
     return wrapped_listener;
-  }
-
-  private void deleteWrappedListener(LocationListener listener) {
-    if (mWrappedListeners.containsKey(listener)) {
-      mWrappedListeners.remove(listener);
-    } else {
-      Log.w(TAG, "deleteWrappedListener: listener not registered");
-    }
   }
 
   private ServiceConnection mCommanderConnection = new ServiceConnection() {

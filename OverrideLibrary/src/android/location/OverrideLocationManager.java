@@ -25,9 +25,10 @@ public class OverrideLocationManager extends LocationManager {
 
   private static final String TAG = "OverrideLocationManager";
 
-  public static final int COMMAND_RELEASE = 0;
-  public static final int COMMAND_SUPPRESS = 1;
-  public static final int COMMAND_PERTURB = 2;
+  public static final int COMMAND_UNDEFINED = 0;
+  public static final int COMMAND_RELEASE = 1;
+  public static final int COMMAND_SUPPRESS = 2;
+  public static final int COMMAND_PERTURB = 3;
 
   public static final String PERTURB_VARIANCE = "perturb_variance";
 
@@ -38,11 +39,13 @@ public class OverrideLocationManager extends LocationManager {
   private Random mRandom;
   private double mVariance;
 
+  private HashMap<String, Location> mLastKnownLocation = new HashMap<String, Location>();
+
   public OverrideLocationManager(Context context, ILocationManager service) {
     super(service);
     mContext = context;
     mWrappedListeners = new HashMap<LocationListener, LocationListener>();
-    mCommandState = COMMAND_RELEASE;
+    mCommandState = COMMAND_UNDEFINED;
 
     Intent bindIntent = new Intent("android.override.OverrideCommanderService");
 
@@ -209,6 +212,7 @@ public class OverrideLocationManager extends LocationManager {
             listener.onLocationChanged(perturbed_location);
             break;
           case COMMAND_SUPPRESS:
+          case COMMAND_UNDEFINED:
             // Don't send the update. Do nothing.
             break;
         }
@@ -222,6 +226,7 @@ public class OverrideLocationManager extends LocationManager {
             listener.onStatusChanged(s, i, bundle);
             break;
           case COMMAND_SUPPRESS:
+          case COMMAND_UNDEFINED:
             // Don't send the update. Do nothing.
             break;
         }
@@ -235,6 +240,7 @@ public class OverrideLocationManager extends LocationManager {
             listener.onProviderEnabled(s);
             break;
           case COMMAND_SUPPRESS:
+          case COMMAND_UNDEFINED:
             // Don't send the update. Do nothing.
             break;
         }
@@ -248,6 +254,7 @@ public class OverrideLocationManager extends LocationManager {
             listener.onProviderDisabled(s);
             break;
           case COMMAND_SUPPRESS:
+          case COMMAND_UNDEFINED:
             // Don't send the update. Do nothing.
             break;
         }

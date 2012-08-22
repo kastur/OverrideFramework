@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/OverrideDemo/OverrideDemo.iml" filepath="$PROJECT_DIR$/OverrideDemo/OverrideDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/OverrideLibrary/OverrideLibrary.iml" filepath="$PROJECT_DIR$/OverrideLibrary/OverrideLibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/OverrideService/OverrideService.iml" filepath="$PROJECT_DIR$/OverrideService/OverrideService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OverrideTests/OverrideTests.iml" filepath="$PROJECT_DIR$/OverrideTests/OverrideTests.iml" />
     </modules>
   </component>
 </project>

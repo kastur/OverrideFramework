@@ -1,17 +1,17 @@
 echo "------ PATCHING smali files in framework_decoded"
 echo "Copy Override* to android/location"
-rm -rf inout/framework_decoded/smali/android/location/Override*
-cp -r inout/override_decoded/smali/android/location/Override* inout/framework_decoded/smali/android/location/
+rm -rf inout/framework_decoded/android/location/Override*
+cp -r inout/override_decoded/smali/android/location/Override* inout/framework_decoded/android/location/
 
 echo "Copy IOverride* to android/override"
-rm -rf inout/framework_decoded/smali/android/override
-mkdir inout/framework_decoded/smali/android/override
-cp -r inout/override_decoded/smali/android/override/IOverride* inout/framework_decoded/smali/android/override
+rm -rf inout/framework_decoded/android/override
+mkdir inout/framework_decoded/android/override
+cp -r inout/override_decoded/smali/android/override/IOverride* inout/framework_decoded/android/override
 
 echo "Apply patch to android/app/ContextImpl.smali"
-patch -p1 inout/framework_decoded/smali/android/app/ContextImpl.smali android_app_ContextImpl.patch
+patch -p1 inout/framework_decoded/android/app/ContextImpl.smali android_app_ContextImpl.patch
 
 echo "Copy new anonymous ServiceFetcher: android/app/ContextImpl$Override.smali"
-cp ContextImpl\$Override.smali inout/framework_decoded/smali/android/app/
+cp ContextImpl\$Override.smali inout/framework_decoded/android/app/
 
 echo "------ FINISHED PATCHING"

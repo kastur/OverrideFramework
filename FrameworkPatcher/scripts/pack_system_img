@@ -1,0 +1,1 @@
+mkyaffs2image inout/extracted inout/system_new.img

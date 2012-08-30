@@ -1,5 +1,5 @@
---- inout/framework_decoded/smali/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
-+++ inout/framework_decoded/smali/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
+--- inout/framework_decoded/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
++++ inout/framework_decoded/android/app/ContextImpl.smali	2012-08-12 14:59:33.000000000 -0700
 @@ -301,7 +301,7 @@
      invoke-static {v0, v1}, Landroid/app/ContextImpl;->registerService(Ljava/lang/String;Landroid/app/ContextImpl$ServiceFetcher;)V
  

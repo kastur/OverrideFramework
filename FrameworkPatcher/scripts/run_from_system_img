@@ -1,0 +1,14 @@
+rm -rf inout
+mkdir inout
+
+unpack_system_img
+decode_framework_from_unpacked_system_img
+
+copy_override
+decode_override
+
+patch_framework
+
+build_framework
+put_framework_into_extracted_system_img
+pack_system_img

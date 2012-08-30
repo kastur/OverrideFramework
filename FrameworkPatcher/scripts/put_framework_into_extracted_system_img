@@ -1,0 +1,2 @@
+cp inout/framework_new.jar inout/extracted/framework/framework.jar
+rm -rf inout/extracted/framework/framework.odex

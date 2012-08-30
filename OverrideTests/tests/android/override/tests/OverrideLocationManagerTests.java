@@ -7,10 +7,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.OverrideLocationManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.test.AndroidTestCase;
@@ -104,7 +102,7 @@ public class OverrideLocationManagerTests extends AndroidTestCase {
       Log.d("TEST", "RemoteException");
     }
 
-    assertEquals(mManager.getCommandState(), COMMAND_RELEASE);
+    assertEquals(mManager.getCommandState(), OverrideLocationManager.COMMAND_RELEASE);
 
   }
 }
